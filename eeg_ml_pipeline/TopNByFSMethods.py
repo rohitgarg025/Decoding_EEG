@@ -1,16 +1,18 @@
 #!/usr/bin/env python
 # coding: utf-8
+# DATE - 01/11/2022
 
-# In[ ]:
+# AUTHOR - ROHIT GARG
 
 
 from ImportUtils import *
 
 from sklearn.ensemble import RandomForestRegressor as sklearnrfi
 from sklearn.feature_selection import VarianceThreshold
+from sklearn.metrics import r2_score
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import explained_variance_score
 
-
-# In[ ]:
 
 
 def topElectrodeFSRegressionRanking(dataset, window, stride, sfreq, clf, label, scale=False, pca=False, mutual_info = False, method='SelectKBest'):
@@ -129,7 +131,7 @@ def topElectrodeFSRegressionRanking(dataset, window, stride, sfreq, clf, label, 
     featureScores.columns = ['Specs','Score']  #naming the dataframe columns
     features_result = featureScores.nlargest(X.shape[1],'Score')
     print(features_result)
-    features_result.to_csv(pwd + "/" + dataset + "/arousal_plots/" + "CommonElectrodeFSRegressionRanking"+ method + str(window) + str(stride) + ".csv")
+    features_result.to_csv(f"output/{dataset}_{label}_electrode_selection.csv")
 
 
     ###################################################################
@@ -150,10 +152,14 @@ def topElectrodeFSRegressionRanking(dataset, window, stride, sfreq, clf, label, 
     
     N =  len(topelectrodes)
     topRmseList = []
+    topR2List = []
+    topMAEList = []
+    topEVList = []
     topNList = ["{}".format(x) for x in range(1,N+1)]
 
     
     for n in range(1,N+1):
+
         
         electrode_index = topelectrodes[:n]
         print(topelectrodes)
@@ -207,8 +213,17 @@ def topElectrodeFSRegressionRanking(dataset, window, stride, sfreq, clf, label, 
         clf.fit(X_train, y_train)
         y_predict = clf.predict(X_test)
         rmse = mean_squared_error(y_test, y_predict,squared=False)
+        score_r2 = r2_score(y_test, y_predict)
+        score_mae = mean_absolute_error(y_test, y_predict)
+        score_ev = explained_variance_score(y_test, y_predict)
         print("window: {}, stide: {}, rmse: {}".format(window,stride,rmse))
+        print(f"r2: {score_r2}")
+        print(f"mae: {score_mae}")
+        print(f"ev: {score_ev}")
         topRmseList.append(rmse)
+        topR2List.append(score_r2)
+        topMAEList.append(score_mae)
+        topEVList.append(score_ev)
 
 
 
@@ -217,11 +232,19 @@ def topElectrodeFSRegressionRanking(dataset, window, stride, sfreq, clf, label, 
     # features_result = features_result.reset_index()
     topNElectrode_df = pd.DataFrame(topNList)
     topNRmse_df = pd.DataFrame(topRmseList)
+    topNR2_df = pd.DataFrame(topR2List)
+    topNMAE_df = pd.DataFrame(topMAEList)
+    topNEV_df = pd.DataFrame(topEVList)
+
     #concat two dataframes for better visualization 
-    topNElectrodeRanking = pd.concat([topNElectrode_df, topNRmse_df],axis=1)
-    topNElectrodeRanking.columns = ['Electrode','RMSE']  #naming the dataframe columns
-    print(topNElectrodeRanking)
-    topNElectrodeRanking.to_csv(pwd + "/" + dataset + "/arousal_plots/" + "topCommonElectrodeFSRegressionRanking"+ method + str(window) + str(stride) + ".csv")
+    topNElectrode = pd.concat([topNElectrode_df, topNRmse_df, topNR2_df, topNMAE_df, topNEV_df],axis=1)
+
+    topNElectrode.columns = ['Electrode','RMSE', 'R2', 'MAE', 'EV']  #naming the dataframe columns
+
+    print(topNElectrode)
+
+    topNElectrode.to_csv(f"output/{dataset}_{label}_electrode.csv")
+
     # return features_result
     
     
@@ -231,8 +254,10 @@ def topElectrodeFSRegressionRanking(dataset, window, stride, sfreq, clf, label, 
     plt.rcParams.update({'font.size': 30})
     plt.xlabel('Top N Electrodes')
     plt.ylabel('RMSE')
-    plt.plot(topNElectrodeRanking.loc[:,"Electrode"], topNElectrodeRanking.loc[:,"RMSE"])
+    plt.plot(topNElectrode.loc[:,"Electrode"], topNElectrode.loc[:,"RMSE"])
     plt.tight_layout()
+    plt.savefig(f"output/{dataset}_{label}_electrode_RMSE.svg")
+    plt.clf()
 
 
 # In[ ]:
@@ -363,7 +388,7 @@ def topFeatureFSRegressionRanking(dataset, window, stride, sfreq, clf, label, sc
     featureScores.columns = ['Specs','Score']  #naming the dataframe columns
     features_result = featureScores.nlargest(X.shape[1],'Score')
     print(features_result)
-    features_result.to_csv(pwd + "/" + dataset + "/arousal_plots/" + "CommonFeatureFSRegressionRanking"+ method + str(window) + str(stride) + ".csv")
+    features_result.to_csv(f"output/{dataset}_{label}_feature_selection.csv")
 
 
 
@@ -386,8 +411,11 @@ def topFeatureFSRegressionRanking(dataset, window, stride, sfreq, clf, label, sc
     # TOP-N-FEATURE-RANKING
     print(topfeatures)
     print(topelectrodes)
-    N =  len(topfeatures)
+    N = len(topfeatures)
     topNRmseList = []
+    topR2List = []
+    topMAEList = []
+    topEVList = []
     topNList = ["{}".format(x) for x in range(1,N+1)]
 
 
@@ -441,8 +469,17 @@ def topFeatureFSRegressionRanking(dataset, window, stride, sfreq, clf, label, sc
         clf.fit(X_train, y_train)
         y_predict = clf.predict(X_test)
         rmse = mean_squared_error(y_test, y_predict,squared=False)
+        score_r2 = r2_score(y_test, y_predict)
+        score_mae = mean_absolute_error(y_test, y_predict)
+        score_ev = explained_variance_score(y_test, y_predict)
         print("window: {}, stide: {}, rmse: {}".format(window,stride,rmse))
+        print(f"r2: {score_r2}")
+        print(f"mae: {score_mae}")
+        print(f"ev: {score_ev}")
+        topEVList.append(score_ev)
         topNRmseList.append(rmse)
+        topR2List.append(score_r2)
+        topMAEList.append(score_mae)
 
 
 
@@ -450,197 +487,31 @@ def topFeatureFSRegressionRanking(dataset, window, stride, sfreq, clf, label, sc
     topNFeatures_df = pd.DataFrame(topNList)
 
     topNRmse_df = pd.DataFrame(topNRmseList)
+    topNR2_df = pd.DataFrame(topR2List)
+    topNMAE_df = pd.DataFrame(topMAEList)
+    topNEV_df = pd.DataFrame(topEVList)
+
 
     #concat two dataframes for better visualization 
-    topNFeaturesRanking = pd.concat([topNFeatures_df, topNRmse_df],axis=1)
-    topNFeaturesRanking.columns = ['Feature','RMSE']  #naming the dataframe columns
-    print(topNFeaturesRanking)
-    topNFeaturesRanking.to_csv(pwd + "/" + dataset + "/arousal_plots/" + "topCommonFeatureFSRegressionRanking"+ method + str(window) + str(stride) + ".csv")
-    
+    topNFeatures = pd.concat([topNFeatures_df, topNRmse_df, topNR2_df, topNMAE_df, topNEV_df],axis=1)
+
+    topNFeatures.columns = ['Feature', 'RMSE', 'R2', 'MAE', 'EV']  #naming the dataframe columns
+
+    print(topNFeatures)
+
+    topNFeatures.to_csv(f"output/{dataset}_{label}_features.csv")
+
     # Plotting
     fig = plt.gcf()
     fig.set_size_inches(25, 10)
     plt.rcParams.update({'font.size': 30})
     plt.xlabel('Top N Features')
     plt.ylabel('RMSE')
-    plt.plot(topNFeaturesRanking.loc[:,"Feature"], topNFeaturesRanking.loc[:,"RMSE"])
+    plt.plot(topNFeatures.loc[:,"Feature"], topNFeatures.loc[:,"RMSE"])
     plt.tight_layout()
 
 
 # In[ ]:
-
-
-def topFSColumnsRegressionRanking(dataset, window, stride, sfreq, clf, label, scale=False, pca=False, mutual_info = False, method='SelectKBest'):
-        # Method C
-        # parameters :-
-                # dataset - name of the dataset
-                # window - length of the sliding window in seconds
-                # stride - length of the stride of the sliding window in seconds
-                # sfreq - sampling frequency of the EEG data
-                # clf - name of the classifier to be used
-                # label - valence/arousal/dominance/liking label (shape depends upon the dataset)
-                # scale - sclaing of the EEG data if required
-                # mutual_info - Mutual ranking between features based on information theory
-                # method - 'RandomForest' 'RFE' 'SelectKBest'
-                
-    # returns :-
-                # void
-    fs = sfreq
-    pwd = os.getcwd()
-
-    featurepath = os.getcwd() + '/' + dataset + '/data_extracted/featuresDict/'
-    ans = np.load((featurepath + "shannonEntropy_{}_{}.npz").format(window,stride), allow_pickle=True)['features']
-    Y_epoch = np.load((featurepath + "shannonEntropy_{}_{}.npz").format(window,stride), allow_pickle=True)['Y']
-
-    print("Number of segments are: {}".format(ans.shape[1]))
-    
-    #X##############################################################################################
-    
-    featuresDict = None
-    featuresDict = loadFeaturesDict(dataset)
-
-    common = []
-    with open('intersection.pkl', 'rb') as f:
-        common = pickle.load(f)
-
-    for k in list(featuresDict.keys()):
-        if k not in common:
-            # pop out common feature
-            featuresDict.pop(k)
-
-    print("Number of Features:",len(list(featuresDict.keys())))
-    featuresList = list(featuresDict.keys())
-
-    feature_channel_index = []
-
-    feature_channel_index = []
-    for feature in featuresList:
-        for i in range(featuresDict[feature].shape[0]):
-            if(i>=10):
-                feature_channel_index.append(feature +'_'+  str(i))
-            else:
-                feature_channel_index.append(feature + '_0' + str(i))
-
-    print(len(list(featuresDict.keys())))
-    print("Number of Feature-Columns: {}\n".format(len(feature_channel_index)))
-
-    #defining feature matrix
-    featureMatrix = np.empty((0,ans.shape[1])) #[14*32 + 1,80640]
-    for key,value in featuresDict.items():
-        featureMatrix = np.append(featureMatrix,value,axis=0)
-        
-
-    
-    print("Shape of FeatureMatrix: {}\n".format(featureMatrix.T.shape))
-    
-    #data-imputation and nan-removal
-    featureMatrix = featureMatrix.astype(np.float32)
-    
-    if np.isnan(featureMatrix).any():
-        featureMatrix = np.nan_to_num(featureMatrix,nan=0)
-
-    X = pd.DataFrame(featureMatrix.T)
-    X = X.replace([np.inf, -np.inf], np.nan)
-    X = X.fillna(0)
-    X.columns = feature_channel_index
-    
-
-    #Y#####################################################################
-
-    y = Y_epoch[:,label] #valence
-    # y = pd.DataFrame(y)
-
-    ########################################################################
-    dfscores = None
-
-    if(method == 'RandomForest'):
-        '''Random Forest Feature Importances'''
-        estimator = sklearnrfi() #RandomForestRegressor()
-        fit = estimator.fit(X,y)
-        dfscores = pd.DataFrame(fit.feature_importances_)
-    elif(method == 'RFE'):
-        ''' RFE'''
-        selector = RFE(clf, n_features_to_select=X.shape[1], step=1)
-        selector = selector.fit(X, y)
-        dfscores = pd.DataFrame(selector.ranking_)
-
-    elif(method == 'SelectKBest'):
-        """SelecKBest"""
-        #apply SelectKBest class to extract top 10 best features
-        func = None
-        if mutual_info == False:
-            func = f_classif
-        else:
-            func = mutual_info_classif
-
-        bestfeatures = SelectKBest(score_func=func, k=X.shape[1])
-        fit = bestfeatures.fit(X,y)
-
-        dfscores = pd.DataFrame(fit.scores_)
-        
-
-
-
-    dfcolumns = pd.DataFrame(X.columns)
-
-    #concat two dataframes for better visualization 
-    featureScores = pd.concat([dfcolumns,dfscores],axis=1)
-    featureScores.columns = ['Column','Score']  #naming the dataframe columns
-    features_result = featureScores.nlargest(X.shape[1],'Score')
-    print(features_result)
-
-    N = len(feature_channel_index)
-    topNRmseList = []
-    topNList = ["{}".format(x) for x in range(1,N+1)]
-
-    for n in range(1, N+1):
-        ranking_df = features_result.head(n)
-        topncols = ranking_df['Column'].tolist()
-        
-        input_df = pd.DataFrame(X[topncols])
-
-        X_train, X_test, y_train, y_test = train_test_split(input_df, y, test_size=0.2, random_state=42)
-
-        # Normalise-scale data 
-        # Feature Scaling
-        if(scale == True):
-            sc = StandardScaler()
-            X_train = sc.fit_transform(X_train)
-            X_test = sc.transform(X_test)
-
-        # Apply classfier       
-        clf.fit(X_train, y_train)
-        y_predict = clf.predict(X_test)
-        rmse = mean_squared_error(y_test, y_predict, squared=False)
-        print(n,rmse)
-        topNRmseList.append(rmse)
-
-
-    topcol_df = pd.DataFrame(topNList)
-    toprmse_df = pd.DataFrame(topNRmseList)
-    #concat two dataframes for better visualization 
-    topcolRanking = pd.concat([topcol_df, toprmse_df],axis=1)
-    topcolRanking.columns = ['Column','RMSE']  #naming the dataframe columns
-    topfeatures_result = topcolRanking
-    print(topfeatures_result)
-    topfeatures_result.to_csv(pwd + "/" + dataset + "/arousal_plots/" + "topFSColumnsRegressionRanking"+method + str(window) + str(stride) + ".csv")
-
-    # Plotting
-    fig = plt.gcf()
-    fig.set_size_inches(60, 9)
-
-    plt.xlabel('Top N Columns')
-    plt.ylabel('RMSE')
-    plt.title("Top N Columns v/s RMSE Plot for Window:{} Stride:{} epoched data by varying N".format(window,stride))
-    plt.plot(topfeatures_result.loc[:,"Column"], topfeatures_result.loc[:,"RMSE"])
-    plt.tight_layout()
-    plt.savefig(pwd + "/" + dataset + "/arousal_plots/" + "topFSColumnsRegressionRanking"+method + str(window) + str(stride) + ".svg", bbox_inches='tight', dpi=500)
-    plt.show()
-    plt.clf()
-
-
-# In[ ]:
-
 
 if __name__ == '__main__':
     pass
