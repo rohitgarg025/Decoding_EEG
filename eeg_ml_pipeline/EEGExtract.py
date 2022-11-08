@@ -273,7 +273,6 @@ def hjorthParameters(xV):
     # in the matlab code for hjorth complexity subtraction by mob not division was used 
     return mobility, complexity
 
-##########
 # false nearest neighbor descriptor
 def falseNearestNeighbor(eegData, fast=True):
     # Average Mutual Information
@@ -293,18 +292,18 @@ def falseNearestNeighbor(eegData, fast=True):
             else:
                 cur_eegData = eegData[chan, :, epoch]
                 lagidx = 0  # we are looking for the index of the lag that makes the signal maximally uncorrelated to the original
-                minNMI = 1  # normed_mutual_info is from 1 (perfectly correlated) to 0 (not at all correlated) 
-                for lag in range(1, max_delay):
-                x = cur_eegData[:-lag]
-                xlag = cur_eegData[lag:]
-                convert float data into histogram bins
-                nbins = int(np.floor(1 + np.log2(len(x)) + 0.5))
-                x_discrete = np.histogram(x, bins=nbins)[0]
-                xlag_discrete = np.histogram(xlag, bins=nbins)[0]
-                cNMI = normed_mutual_info(x_discrete, xlag_discrete)
-                if cNMI < minNMI:
-                    minNMI = cNMI
-                    lagidx = lag
+                # # minNMI = 1  # normed_mutual_info is from 1 (perfectly correlated) to 0 (not at all correlated) 
+                # # for lag in range(1, max_delay):
+                # #     x = cur_eegData[:-lag]
+                # #     xlag = cur_eegData[lag:]
+                # #     # convert float data into histogram bins
+                # #     nbins = int(np.floor(1 + np.log2(len(x)) + 0.5))
+                # #     x_discrete = np.histogram(x, bins=nbins)[0]
+                # #     xlag_discrete = np.histogram(xlag, bins=nbins)[0]
+                # #     cNMI = normed_mutual_info(x_discrete, xlag_discrete)
+                # #     if cNMI < minNMI:
+                # #         minNMI = cNMI
+                # #         lagidx = lag
                 # nearest neighbors part
                 knn = int(max(2, 6*lagidx))  # heuristic (number of nearest neighbors to look up)
                 m = 1 # lagidx + 1

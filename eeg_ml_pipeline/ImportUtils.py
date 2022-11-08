@@ -40,12 +40,18 @@ import copy
 from sklearn import feature_selection
 import argparse
 
-import cuml
-from cuml.svm import SVR
-from cuml.ensemble import RandomForestRegressor
-from cuml.svm import SVC
-from cuml.ensemble import RandomForestClassifier
-from cuml.metrics import  accuracy_score
+from sklearn.svm import SVR 
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+
+# import cuml
+# from cuml.svm import SVR
+# from cuml.ensemble import RandomForestRegressor
+# from cuml.svm import SVC
+# from cuml.ensemble import RandomForestClassifier
+# from cuml.metrics import  accuracy_score
 
 
 # In[ ]:
