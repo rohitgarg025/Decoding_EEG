@@ -1,4 +1,6 @@
 ## Decoding the Neural Signatures of Valence and Arousal From Portable EEG Headset
+
+### Getting Started
 This repository contains code for the research article, _Decoding the Neural Signatures of Valence and Arousal From Portable EEG Headset_ which can be found [here](https://www.frontiersin.org/articles/10.3389/fnhum.2022.1051463/abstract).
 
 ### Abstract
