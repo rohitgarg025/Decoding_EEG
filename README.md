@@ -8,7 +8,14 @@ This repository contains code for the research article, _Decoding the Neural Sig
 Emotion classification using electroencephalography (EEG) data and machine learning techniques have been on the rise in the recent past. However, past studies use data from medical-grade EEG setups with long set-up times and environment constraints. This paper focuses on classifying emotions on the valence-arousal plane using various feature extraction, feature selection and machine learning techniques.
 We evaluate different feature extraction and selection techniques and propose the optimal set of features and electrodes for emotion recognition. The images from the OASIS image dataset were used to elicit valence and arousal emotions, and the EEG data was recorded using the Emotiv Epoc X mobile EEG headset. The analysis is carried out on publicly available datasets: DEAP and DREAMER for benchmarking. We propose a novel feature ranking technique and incremental learning approach to analyze performance dependence on the number of participants. Leave-one-subject-out cross-validation was carried out to identify subject bias in emotion elicitation patterns. The importance of different electrode locations was calculated, which could be used for designing a headset for emotion recognition. The collected dataset and pipeline are also published. Our study achieved a root mean square score (RMSE) of 0.905 on DREAMER, 1.902 on DEAP, and 2.728 on our dataset for valence label and a score of 0.749 on DREAMER, 1.769 on DEAP and 2.3 on our proposed dataset for arousal label.
 
-## Dependencies
+### Datasets involved
+
+The following EEG datasets were used in the project:
+* [DREAMER Dataset](https://zenodo.org/record/546113#.Y465MHZBw2w)
+* [DEAP Dataset](https://www.eecs.qmul.ac.uk/mmv/datasets/deap/)
+* [OASIS EEG Dataset](https://zenodo.org/record/7332684#.Y46zcnZBw2x) 
+
+### Dependencies
 
 * Python 3
 * EEGExtract.py
